@@ -14,6 +14,7 @@
 正式網站公開部署工作流程預設需 repository variable PUBLIC_RELEASE_READY=true，未完成以上清單不要啟用。CI可先執行。失敗回復前一通過版本；localStorage schema變更須有遷移方案，不直接清掉舊商品。
 
 ## 真實驗收紀錄
+
 法規審閱：未執行。
 普通紙實印：未執行。
 貼紙實印：未執行。
