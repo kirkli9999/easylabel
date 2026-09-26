@@ -187,6 +187,16 @@ function Notice({ children, tone = 'soft' }: { children: ReactNode; tone?: strin
   );
 }
 
+function jobForPaper(paper: Paper) {
+  const job = newJob();
+  try {
+    job.quantity = Math.min(100, sheetLayout(paper, 1).capacity);
+  } catch {
+    // Invalid dimensions remain editable and are reported by the normal layout check.
+  }
+  return job;
+}
+
 export default function App() {
   const [initial] = useState(loadWorkspace);
   const [products, setProducts] = useState<Product[]>(() =>
@@ -196,7 +206,7 @@ export default function App() {
   const [paper, setPaper] = useState<Paper>(initial.paper);
   const validPaper = useRef(initial.paper);
   if (paperSchema.safeParse(paper).success) validPaper.current = paper;
-  const [job, setJob] = useState(newJob);
+  const [job, setJob] = useState(() => jobForPaper(initial.paper));
   const [step, setStep] = useState(1),
     [help, setHelp] = useState(false);
   const [recovery, setRecovery] = useState(!!initial.error);
@@ -265,7 +275,7 @@ export default function App() {
   }
   function switchProduct(id: string) {
     setSelected(id);
-    setJob(newJob());
+    setJob(jobForPaper(paper));
     setPdf(null);
     setPdfError('');
   }
@@ -1125,7 +1135,7 @@ export default function App() {
                       <button
                         className="text-button"
                         onClick={() => {
-                          setJob(newJob());
+                          setJob(jobForPaper(paper));
                           setToast('已開始新批次，請重新填寫並確認有效日期。');
                         }}
                       >
