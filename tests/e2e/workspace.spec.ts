@@ -142,7 +142,7 @@ test('corrupt import is rejected without destroying product', async ({ page }) =
     mimeType: 'application/json',
     buffer: Buffer.from('{"schemaVersion":999}'),
   });
-  await expect(page.getByRole('status')).toContainText('不相容');
+  await expect(page.getByRole('status').filter({ hasText: '備份格式或版本不相容' })).toBeVisible();
   await expect(page.getByLabel('品名 *', { exact: true })).toHaveValue('原味奶油餅乾');
 });
 
