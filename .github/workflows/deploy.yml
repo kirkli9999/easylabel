@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deploy:
-    if: vars.PUBLIC_RELEASE_READY == 'true'
+    if: vars.PUBLIC_PREVIEW_ENABLED == 'true' || vars.PUBLIC_RELEASE_READY == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

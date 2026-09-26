@@ -40,4 +40,4 @@ gh auth setup-git
 
 ## 未執行的外部驗收
 
-專業法規審閱、普通紙/貼紙實印、實際字體長寬量測均未執行。`release.ts`保持false，公開部署變數預設關閉，詳見release-checklist.md。
+專業法規審閱、普通紙/貼紙實印、實際字體長寬量測均未執行。`release.ts`保持false。使用者已授權以 `PUBLIC_PREVIEW_ENABLED=true` 先公開試用草稿版；這與正式驗收獨立，詳見release-checklist.md。

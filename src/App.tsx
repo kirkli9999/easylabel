@@ -585,6 +585,11 @@ export default function App() {
               新增商品
             </button>
           </div>
+          <Notice>
+            <strong>公開試用版</strong> · 可以用自己的商品資料試做標籤。目前 PDF
+            保留「草稿／待確認」浮水印，尚待法規專業審閱與實印驗收，請勿直接用於販售。
+            內建商品為虛構示範；填寫的資料僅儲存在這台裝置的瀏覽器，不會公開給其他人。
+          </Notice>
           {toast && (
             <div className="toast" role="status">
               <AlertCircle size={18} />

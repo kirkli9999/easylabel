@@ -4,6 +4,8 @@
 
 **目前是測試版：法規專業審閱、實際紙張及字體量測尚未完成，因此 PDF 保留「草稿／待確認」浮水印。程式測試不是全面合規驗證。**
 
+[開啟公開試用版](https://kirkli9999.github.io/easylabel/)。可填寫自己的商品資料並下載草稿；內建資料為虛構示範，草稿請勿直接用於販售。各位使用者的商品資料保存在各自瀏覽器，不會因網站公開而分享給其他人。
+
 ## 本機啟動
 
 安裝 Node.js 24 LTS（至少22.12）。在 repo 目錄執行：
@@ -50,13 +52,12 @@ npm run test:e2e
 
 GitHub Actions Checks 執行型別、單元、PDF、瀏覽器測試。部署固定 `/easylabel/`；若更名需同步 Vite `BASE_PATH`、Playwright 與 workflow。
 
-1. 推送並完成 PR 檢查。
-2. 依 `docs/release-checklist.md` 完成法規審阅及普通紙/貼紙實印。
-3. 在 `src/domain/release.ts` 紀錄驗收及內部證據索引，經PR複核才啟用正式輸出。
-4. GitHub Settings → Pages → GitHub Actions。
-5. Settings → Secrets and variables → Actions → Variables，設定 `PUBLIC_RELEASE_READY=true` 才啟用公開部署工作流程。
+1. 推送並完成 PR 檢查，再合併至 main。
+2. GitHub Settings → Pages → GitHub Actions。
+3. 公開試用：設定 Actions repository variable `PUBLIC_PREVIEW_ENABLED=true`，執行 Publish GitHub Pages 工作流程。這只開啟網站部署，不會解除 PDF 草稿限制。
+4. 正式標籤輸出：依 `docs/release-checklist.md` 完成法規審閱及普通紙/貼紙實印，在 `src/domain/release.ts` 紀錄真實驗收及內部證據索引，經 PR 複核才啟用。`PUBLIC_RELEASE_READY` 保留供正式發布使用。
 
-預設部署關閉以符合先驗收後發布計畫。本機開發与CI可照常使用。
+使用者於 2026-09-27 授權先公開試用，讓朋友以實際商品資料體驗；法規審閱與實印狀態仍為未完成。關閉自動部署可將兩項部署變數設為 false；已上線內容需於 Pages 設定另行取消發布。
 
 ## 字型與授權
 
