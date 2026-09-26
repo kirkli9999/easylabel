@@ -46,6 +46,9 @@ export function wrapText(text: string, font: PDFFont, size: number, width: numbe
 }
 function compose(p: Product, job: PrintJob, paper: Paper, font: PDFFont): Op[] {
   const ops: Op[] = [];
+  // Narrow labels use a fixed stacked template, never smaller type or omitted content.
+  const stacked = paper.width < 110;
+  const lineHeight = stacked ? 12.5 : LINE;
   const pad = mm(5),
     width = mm(paper.width),
     inner = width - pad * 2,
@@ -59,7 +62,7 @@ function compose(p: Product, job: PrintJob, paper: Paper, font: PDFFont): Op[] {
     offset = pad,
   ) {
     for (const line of wrapText(value, font, size, availableWidth)) {
-      const step = size === FONT_SIZE ? LINE : size * 1.35;
+      const step = size === FONT_SIZE ? lineHeight : size * 1.35;
       cursor += step;
       ops.push({
         type: 'text',
@@ -85,9 +88,9 @@ function compose(p: Product, job: PrintJob, paper: Paper, font: PDFFont): Op[] {
   if (p.sharedLine) text(`同產線資訊：${p.sharedLine}`);
   line(1.2);
   const columnsStart = cursor;
-  const tableWidth = inner * 0.63,
-    detailX = pad + tableWidth + mm(4),
-    detailWidth = inner - tableWidth - mm(4);
+  const tableWidth = stacked ? inner : inner * 0.63,
+    detailX = stacked ? pad : pad + tableWidth + mm(4),
+    detailWidth = stacked ? inner : inner - tableWidth - mm(4);
   text('營養標示', 12, true, tableWidth);
   text(
     `每一份量 ${roundLabel(p.nutrition.servingSize, true) ?? '未填'} 公克`,
@@ -107,7 +110,7 @@ function compose(p: Product, job: PrintJob, paper: Paper, font: PDFFont): Op[] {
   const right = pad + tableWidth - 2,
     middle = pad + tableWidth * 0.64;
   function row(label: string, a: string, b: string) {
-    cursor += LINE;
+    cursor += lineHeight;
     const firstWidth = tableWidth * 0.35;
     const available = tableWidth * 0.3;
     for (const s of [label, a, b]) ensureGlyphs(s, font);
@@ -116,7 +119,9 @@ function compose(p: Product, job: PrintJob, paper: Paper, font: PDFFont): Op[] {
       font.widthOfTextAtSize(a, FONT_SIZE) > available ||
       font.widthOfTextAtSize(b, FONT_SIZE) > available
     )
-      throw new Error('營養表欄位放不下，請增加標籤寬度或檢查數值長度。');
+      throw new Error(
+        `營養表「${label || '欄位標題'}」放不下。請到列印設定增加寬度或選「加寬雙張」，並核對數值是否誤填；不要刪減正確數據。`,
+      );
     ops.push(
       { type: 'text', text: label, x: pad, y: cursor, size: FONT_SIZE },
       {
@@ -146,7 +151,7 @@ function compose(p: Product, job: PrintJob, paper: Paper, font: PDFFont): Op[] {
   cursor += 5;
   ops.push({ type: 'line', x: pad, y: cursor, x2: pad + tableWidth, y2: cursor, weight: 1.2 });
   const tableEnd = cursor;
-  cursor = columnsStart;
+  cursor = stacked ? tableEnd + 4 : columnsStart;
   for (const entry of [
     `負責廠商：${p.maker || '待填寫'}`,
     `電話：${p.phone || '待填寫'}`,
@@ -156,7 +161,7 @@ function compose(p: Product, job: PrintJob, paper: Paper, font: PDFFont): Op[] {
     ...(p.notes ? [p.notes] : []),
   ]) {
     text(entry, FONT_SIZE, false, detailWidth, detailX);
-    cursor += 3;
+    cursor += stacked ? 1 : 3;
   }
   cursor = Math.max(cursor, tableEnd);
   if (cursor > maxBottom)
