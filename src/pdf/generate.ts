@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, degrees, type PDFFont, type PDFPage } from 'pdf-lib';
+import { PDFDocument, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import type { Paper, PrintJob, Product } from '../domain/model';
 import { NUTRIENTS } from '../domain/model';
@@ -230,18 +230,6 @@ export async function buildPdf(
       h = mm(paper.height);
     drawOps(page, ops, font, x, top);
     if (paper.cropMarks) crop(page, x, top, w, h);
-    if (options.draft) {
-      const mark = '草稿／待確認';
-      page.drawText(mark, {
-        x: x + mm(6),
-        y: top - h * 0.7,
-        size: 30,
-        font,
-        color: rgb(0.6, 0.18, 0.12),
-        opacity: 0.25,
-        rotate: degrees(25),
-      });
-    }
   }
   doc.setTitle(`${p.name || '食品標籤'}${options.draft ? '（草稿）' : ''}`);
   doc.setProducer('EasyLabel - browser-local PDF');
