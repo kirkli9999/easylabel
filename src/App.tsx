@@ -53,6 +53,7 @@ import {
 import { loadWorkspace, importProducts, makeBackup, STORAGE_KEY } from './domain/storage';
 import { releaseReady } from './domain/release';
 import { sheetLayout } from './pdf/layout';
+import { PAPER_PRESETS, presetPaper, selectedPreset } from './pdf/presets';
 import { loadFont, download } from './pdf/browser';
 const PdfPreview = lazy(() =>
   import('./components/PdfPreview').then((m) => ({ default: m.PdfPreview })),
@@ -1175,8 +1176,32 @@ export default function App() {
                         <strong>A4 整張貼紙・自行裁切</strong>
                         <small>210 × 297 mm / 直式</small>
                       </div>
-                      <span className="pill">預設模板</span>
+                      <span className="pill">{selectedPreset(paper)?.name ?? '自訂尺寸'}</span>
                     </div>
+                    <div className="preset-options" role="group" aria-label="標籤尺寸預設">
+                      {PAPER_PRESETS.map((preset) => (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          className="preset-option"
+                          aria-pressed={selectedPreset(paper)?.id === preset.id}
+                          onClick={() => setPaper(presetPaper(preset, paper.cropMarks))}
+                        >
+                          <strong>
+                            {preset.name} · 每頁 {sheetLayout(presetPaper(preset), 1).capacity} 張
+                          </strong>
+                          <span>
+                            {preset.width} × {preset.height} mm
+                          </span>
+                          <small>{preset.hint}</small>
+                        </button>
+                      ))}
+                    </div>
+                    <p className="panel-intro">
+                      預設會套用 10 mm 邊界與 6 mm 間距。每頁四張採 2 欄 × 2 列， 長邊可超過 10
+                      公分；寬、高都超過 10 公分則無法在 A4 排四張。
+                      尺寸排得下仍須通過內容檢查，不會自動縮字或省略資訊。
+                    </p>
                     <div className="form-grid">
                       {(
                         [
@@ -1212,11 +1237,24 @@ export default function App() {
                           每頁 <strong>{grid?.capacity}</strong> 張
                         </span>
                         <span>
+                          {grid?.columns} 欄 × {grid?.rows} 列
+                        </span>
+                        <span>
                           共 <strong>{grid?.pages}</strong> 頁 A4
                         </span>
                         <span>固定字型，不自動縮字</span>
                       </div>
                     )}
+                    <button
+                      className="button secondary full-width"
+                      disabled={!!gridError || !grid || grid.capacity > 100}
+                      onClick={() => grid && setJob({ ...job, quantity: grid.capacity })}
+                    >
+                      排滿一頁{grid ? `（${grid.capacity} 張）` : ''}
+                    </button>
+                    <p className="panel-intro">
+                      選尺寸不會改變列印張數；可按「排滿一頁」或自行輸入張數。
+                    </p>
                     <button
                       className="button secondary full-width"
                       onClick={() => void calibration()}

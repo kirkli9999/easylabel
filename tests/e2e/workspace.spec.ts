@@ -1,6 +1,42 @@
 import { test, expect } from '@playwright/test';
 import { writeFile } from 'node:fs/promises';
 
+test('four-up preset renders four complete labels and preserves custom dimensions on reload', async ({
+  page,
+}, testInfo) => {
+  await page.goto('');
+  await page.getByRole('button', { name: '列印設定', exact: false }).first().click();
+  await page.getByRole('button', { name: /四張直式 · 每頁 4 張/ }).click();
+  await expect(page.getByLabel('標籤寬度（mm）')).toHaveValue('92');
+  await expect(page.getByLabel('標籤高度（mm）')).toHaveValue('135');
+  await expect(page.getByLabel('列印張數（1–100）')).toHaveValue('2');
+  await page.getByRole('button', { name: '排滿一頁（4 張）' }).click();
+  await expect(page.getByLabel('列印張數（1–100）')).toHaveValue('4');
+  await page.getByLabel('有效日期 *').fill('2099-12-31');
+  await page.getByText('我已確認這一批的有效日期', { exact: true }).click();
+  await page.getByRole('button', { name: '更新預覽', exact: true }).click();
+  await expect(page.locator('canvas')).toHaveAttribute('data-rendered', '1:1', { timeout: 45000 });
+  const canvasPng = await page
+    .locator('canvas')
+    .evaluate((c: HTMLCanvasElement) => c.toDataURL('image/png'));
+  await writeFile(
+    testInfo.outputPath('four-up.png'),
+    Buffer.from(canvasPng.split(',')[1], 'base64'),
+  );
+  const downloadEvent = page.waitForEvent('download');
+  await page.getByRole('button', { name: '下載草稿 PDF' }).click();
+  await (await downloadEvent).saveAs(testInfo.outputPath('four-up.pdf'));
+  await page.getByLabel('標籤寬度（mm）').fill('91');
+  await expect(page.getByText('自訂尺寸', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '下載草稿 PDF' })).toBeDisabled();
+  await expect(page.getByText('已儲存在此瀏覽器', { exact: true })).toBeVisible();
+  await page.reload();
+  await page.getByRole('button', { name: '列印設定', exact: false }).first().click();
+  await expect(page.getByLabel('標籤寬度（mm）')).toHaveValue('91');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
 test('root workflow renders PDF with embedded Chinese, download and stale invalidation', async ({
   page,
 }, testInfo) => {

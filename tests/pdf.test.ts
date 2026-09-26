@@ -4,12 +4,22 @@ import { PDFDocument } from 'pdf-lib';
 import { demoProduct, DEFAULT_PAPER } from '../src/domain/model';
 import { buildPdf, buildCalibration } from '../src/pdf/generate';
 import { sheetLayout, mm } from '../src/pdf/layout';
+import { PAPER_PRESETS, presetPaper } from '../src/pdf/presets';
 let font: Uint8Array;
 beforeAll(async () => {
   font = new Uint8Array(await readFile('public/fonts/NotoSansCJKtc-Regular.otf'));
 });
 const job = { expiry: '2099-12-31', batch: '', quantity: 2, confirmed: true };
 describe('sheet geometry', () => {
+  it('fits four 92 × 135 labels without crossing margins; both sides over 100 cannot fit four', () => {
+    const paper = presetPaper(PAPER_PRESETS[2]);
+    const grid = sheetLayout(paper, 5);
+    expect([grid.columns, grid.rows, grid.capacity, grid.pages]).toEqual([2, 2, 4, 2]);
+    expect(grid.positions[3]).toEqual({ page: 0, x: 108, y: 151 });
+    expect(grid.positions[4]).toEqual({ page: 1, x: 10, y: 10 });
+    expect(sheetLayout({ ...paper, width: 92.5 }, 4).capacity).toBe(2);
+    expect(sheetLayout({ ...paper, width: 101, height: 101 }, 4).capacity).toBe(2);
+  });
   it.each([
     [1, 1],
     [2, 1],
@@ -33,6 +43,29 @@ describe('sheet geometry', () => {
   });
 });
 describe('actual embedded-font PDF', () => {
+  it.each(PAPER_PRESETS)(
+    'renders the fictional sample in $name without shrinking',
+    async (preset) => {
+      const paper = presetPaper(preset);
+      const capacity = sheetLayout(paper, 1).capacity;
+      const result = await buildPdf(
+        demoProduct(),
+        { ...job, quantity: capacity + 1 },
+        paper,
+        font,
+        { draft: true },
+      );
+      expect(result.perPage).toBe(capacity);
+      expect((await PDFDocument.load(result.bytes)).getPageCount()).toBe(2);
+    },
+  );
+  it('rejects excess content in four-up rather than losing required information', async () => {
+    const p = demoProduct();
+    p.address = '很長的地址'.repeat(30);
+    await expect(
+      buildPdf(p, job, presetPaper(PAPER_PRESETS[2]), font, { draft: true }),
+    ).rejects.toThrow('需要約');
+  });
   it('renders default two-label layout at exact A4 dimensions', async () => {
     const result = await buildPdf(demoProduct(), job, DEFAULT_PAPER, font, { draft: true });
     const doc = await PDFDocument.load(result.bytes);
