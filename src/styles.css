@@ -768,6 +768,13 @@ h1 span {
 .pdf-toolbar button {
   padding: 4px;
 }
+.preview-count {
+  padding: 10px 20px;
+  background: var(--green-light);
+  color: var(--green);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
 .pdf-scroll {
   height: 440px;
   background: #e9eee4;

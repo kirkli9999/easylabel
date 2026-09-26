@@ -6,11 +6,19 @@ test('four-up preset renders four complete labels and preserves custom dimension
 }, testInfo) => {
   await page.goto('');
   await page.getByRole('button', { name: '列印設定', exact: false }).first().click();
+  await page.getByLabel('列印張數（1–100）').fill('1');
   await page.getByRole('button', { name: /四張直式 · 每頁 4 張/ }).click();
   await expect(page.getByLabel('標籤寬度（mm）')).toHaveValue('92');
   await expect(page.getByLabel('標籤高度（mm）')).toHaveValue('135');
-  await expect(page.getByLabel('列印張數（1–100）')).toHaveValue('2');
-  await page.getByRole('button', { name: '排滿一頁（4 張）' }).click();
+  await expect(page.getByLabel('列印張數（1–100）')).toHaveValue('4');
+  await expect(
+    page.getByText('本次 4 張 · 每頁最多 4 張 · 共 1 頁', { exact: true }),
+  ).toBeVisible();
+  await page.getByLabel('列印張數（1–100）').fill('5');
+  await expect(
+    page.getByText('本次 5 張 · 每頁最多 4 張 · 共 2 頁', { exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: /四張直式 · 每頁 4 張/ }).click();
   await expect(page.getByLabel('列印張數（1–100）')).toHaveValue('4');
   await page.getByLabel('有效日期 *').fill('2099-12-31');
   await page.getByText('我已確認這一批的有效日期', { exact: true }).click();
@@ -33,6 +41,10 @@ test('four-up preset renders four complete labels and preserves custom dimension
   await page.reload();
   await page.getByRole('button', { name: '列印設定', exact: false }).first().click();
   await expect(page.getByLabel('標籤寬度（mm）')).toHaveValue('91');
+  await page.getByRole('button', { name: /大版單張 · 每頁 1 張/ }).click();
+  await expect(page.getByLabel('列印張數（1–100）')).toHaveValue('1');
+  await page.getByRole('button', { name: /加寬雙張 · 每頁 2 張/ }).click();
+  await expect(page.getByLabel('列印張數（1–100）')).toHaveValue('2');
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
