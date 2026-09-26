@@ -1185,7 +1185,11 @@ export default function App() {
                           type="button"
                           className="preset-option"
                           aria-pressed={selectedPreset(paper)?.id === preset.id}
-                          onClick={() => setPaper(presetPaper(preset, paper.cropMarks))}
+                          onClick={() => {
+                            const nextPaper = presetPaper(preset, paper.cropMarks);
+                            setPaper(nextPaper);
+                            setJob({ ...job, quantity: sheetLayout(nextPaper, 1).capacity });
+                          }}
                         >
                           <strong>
                             {preset.name} · 每頁 {sheetLayout(presetPaper(preset), 1).capacity} 張
@@ -1198,8 +1202,8 @@ export default function App() {
                       ))}
                     </div>
                     <p className="panel-intro">
-                      預設會套用 10 mm 邊界與 6 mm 間距。每頁四張採 2 欄 × 2 列， 長邊可超過 10
-                      公分；寬、高都超過 10 公分則無法在 A4 排四張。
+                      選取預設會同步設定尺寸與一頁張數，套用 10 mm 邊界與 6 mm 間距。每頁四張採 2 欄
+                      × 2 列， 長邊可超過 10 公分；寬、高都超過 10 公分則無法在 A4 排四張。
                       尺寸排得下仍須通過內容檢查，不會自動縮字或省略資訊。
                     </p>
                     <div className="form-grid">
@@ -1253,7 +1257,7 @@ export default function App() {
                       排滿一頁{grid ? `（${grid.capacity} 張）` : ''}
                     </button>
                     <p className="panel-intro">
-                      選尺寸不會改變列印張數；可按「排滿一頁」或自行輸入張數。
+                      選取預設會排滿一頁；需要更多或更少張時，可自行修改「列印張數」。修改後請按「更新預覽」。
                     </p>
                     <button
                       className="button secondary full-width"
@@ -1362,6 +1366,11 @@ export default function App() {
                     <SlidersHorizontal size={16} />
                   </button>
                 </div>
+                {grid && (
+                  <div className="preview-count" role="status">
+                    本次 {job.quantity} 張 · 每頁最多 {grid.capacity} 張 · 共 {grid.pages} 頁
+                  </div>
+                )}
                 <Suspense
                   fallback={
                     <div className="empty-preview">
