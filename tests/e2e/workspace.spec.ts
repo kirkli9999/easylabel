@@ -41,6 +41,10 @@ test('four-up preset renders four complete labels and preserves custom dimension
   await page.reload();
   await page.getByRole('button', { name: '列印設定', exact: false }).first().click();
   await expect(page.getByLabel('標籤寬度（mm）')).toHaveValue('91');
+  await expect(page.getByLabel('列印張數（1–100）')).toHaveValue('4');
+  await page.getByRole('button', { name: '新批次', exact: true }).click();
+  await expect(page.getByLabel('列印張數（1–100）')).toHaveValue('4');
+  await expect(page.getByLabel('有效日期 *')).toHaveValue('');
   await page.getByRole('button', { name: /大版單張 · 每頁 1 張/ }).click();
   await expect(page.getByLabel('列印張數（1–100）')).toHaveValue('1');
   await page.getByRole('button', { name: /加寬雙張 · 每頁 2 張/ }).click();
