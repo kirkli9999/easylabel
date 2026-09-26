@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.local
+.env*
+!.env.example
+test-results/
+playwright-report/
+work/
+*.tsbuildinfo
+backups/
+reports/
+.claude/settings.local.json
