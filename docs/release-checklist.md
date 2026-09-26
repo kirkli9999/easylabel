@@ -11,11 +11,14 @@
 - [ ] 依證據更新 src/domain/release.ts 的兩項通過狀態、reviewedAt、evidence；再次執行測試及PR review。
 - [ ] GitHub登入後建立public repo及階段PR。GitHub Settings→Pages→GitHub Actions。
 
-正式網站公開部署工作流程預設需 repository variable PUBLIC_RELEASE_READY=true，未完成以上清單不要啟用。CI可先執行。失敗回復前一通過版本；localStorage schema變更須有遷移方案，不直接清掉舊商品。
+公開試用與正式標籤驗收分開：使用者於 2026-09-27 授權先讓朋友試用，使用 repository variable `PUBLIC_PREVIEW_ENABLED=true` 部署草稿版。網站需明示試用狀態、內建虛構示範及資料留在各自瀏覽器；`release.ts` 保持未驗收，PDF 保留草稿浮水印。此部署不代表完成以上驗收。
+
+正式發布變數 `PUBLIC_RELEASE_READY=true` 仍待以上驗收完成。CI可先執行。失敗回復前一通過版本；localStorage schema變更須有遷移方案，不直接清掉舊商品。
 
 ## 真實驗收紀錄
+
 法規審閱：未執行。
 普通紙實印：未執行。
 貼紙實印：未執行。
 字體量測：未執行。
-GitHub遠端/PR：需已登入的GitHub帳號。
+GitHub遠端/PR：已推送並建立五階段 PR；公開試用已獲使用者授權。
