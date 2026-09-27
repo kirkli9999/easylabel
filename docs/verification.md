@@ -15,6 +15,15 @@
 
 測試輸出在未追蹤的`test-results/`；採虛構資料。範例有效日期2099年僅為測試，不能當作食品保存期限依據。
 
+## 2026-09-27 補充檢查（Linux 雲端環境）
+
+- Node.js 22.22.2：`npm run check` 43個Vitest案例、型別檢查、正式build通過；`npm run format:check`通過。
+- Playwright使用環境預裝Chromium 141（以暫時本機設定指定executablePath，未提交）：11個案例通過。
+- 修正：淨重前後含空白時，份量×份數比對把原字串交給Decimal而拋錯，整個介面空白。改用已解析數值，加單元與瀏覽器回歸測試。
+- 修正：pdfjs-dist v6一般版使用`Map#getOrInsertComputed`，Chromium 141等較舊瀏覽器預覽永遠不完成且無錯誤訊息。改用pdfjs官方legacy build（含polyfill），預覽失敗時顯示訊息並提示可直接下載PDF。預覽模組增加約19KB（gzip）。
+- 既有標示值列印前去除前後空白；原始輸入不變。
+- 此次仍非實印或法規審閱，`release.ts`保持未驗收。
+
 ## 尚未完成
 
 - 食品技師/法規人員實際審閱與簽核紀錄。
