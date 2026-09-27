@@ -158,4 +158,23 @@ describe('product checks', () => {
       validate(p, job, approved).some((i) => i.severity === 'error' && i.rule === 'NUTRITION'),
     ).toBe(true);
   });
+  it('surrounding spaces in net weight do not crash validation', () => {
+    const p = demoProduct();
+    for (const value of ['200 ', ' 200', ' 200 ']) {
+      p.netWeight = value;
+      expect(() => validate(p, job, approved)).not.toThrow();
+      expect(validate(p, job, approved).filter((i) => i.field === 'netWeight')).toEqual([]);
+    }
+    p.netWeight = ' 180 ';
+    expect(
+      validate(p, job, approved).some((i) => i.rule === 'NUTRITION' && i.severity === 'warning'),
+    ).toBe(true);
+  });
+  it('label values print without surrounding spaces', () => {
+    const p = demoProduct();
+    p.nutrition.kind = 'label';
+    p.nutrition.perServing.fat = ' 6 ';
+    expect(nutritionOutput(p).perServing.fat).toBe('6');
+    expect(p.nutrition.perServing.fat).toBe(' 6 ');
+  });
 });

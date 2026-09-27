@@ -152,7 +152,7 @@ export function nutritionOutput(p: Product) {
       result[basis][key] = p.nutrition.zero.includes(key)
         ? '0'
         : ((p.nutrition.kind === 'label'
-            ? p.nutrition[basis][key]
+            ? p.nutrition[basis][key].trim()
             : roundLabel(p.nutrition[basis][key], basis === 'perServing')) ?? '待確認');
       if (!p.nutrition[basis][key].trim()) result[basis][key] = '未填';
     }
@@ -261,19 +261,16 @@ export function validate(p: Product, job: PrintJob, release: Release = RELEASE):
   if (job.batch.length > 80) add('LAYOUT', 'error', '批號長度請控制在 80 字以內。');
   const n = p.nutrition;
   const portion = decimal(n.servingSize),
-    count = decimal(n.servings);
+    count = decimal(n.servings),
+    net = decimal(p.netWeight);
   if (!portion?.gt(0) || !roundLabel(n.servingSize, true))
     add('NUTRITION', 'error', '每份量必須大於零且可在允許位數下呈現。', 'nutrition');
   if (!count?.gt(0) || !roundLabel(n.servings, false))
     add('NUTRITION', 'error', '份數需大於零且可用整數或一位小數呈現。', 'nutrition');
   if (!n.source.trim() || !n.confirmed)
     add('NUTRITION', 'pending', '請填寫營養資料來源，並確認原始值與列印值。', 'nutrition');
-  if (
-    portion &&
-    count &&
-    decimal(p.netWeight) &&
-    portion.times(count).minus(p.netWeight).abs().gt('0.1')
-  )
+  // Use the parsed value: Decimal rejects the surrounding spaces that decimal() trims.
+  if (portion && count && net && portion.times(count).minus(net).abs().gt('0.1'))
     add('NUTRITION', 'warning', '每份量 × 份數與淨重不同，請核對份量及修整差異。', 'nutrition');
   const rawServing = n.kind === 'raw' ? n.perServing : n.hasRawEvidence ? n.rawPerServing : null;
   const rawHundred = n.kind === 'raw' ? n.per100 : n.hasRawEvidence ? n.rawPer100 : null;

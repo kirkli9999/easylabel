@@ -109,6 +109,16 @@ test('product persistence, duplication, switching resets batch, safe deletion', 
   await expect(page.getByLabel('品名 *', { exact: true })).toHaveValue('測試芝麻餅乾');
 });
 
+test('net weight with surrounding spaces keeps the workspace usable', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('');
+  await page.getByLabel('淨重（公克） *', { exact: true }).fill('200 ');
+  await expect(page.getByLabel('品名 *', { exact: true })).toBeVisible();
+  await expect(page.getByText('已儲存在此瀏覽器')).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
 test('sorting ingredients invalidates confirmation and missing compound evidence is visible', async ({
   page,
 }) => {
